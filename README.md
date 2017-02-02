@@ -1,11 +1,5 @@
 # vkcommunity_bot
 
-Бот для работы с сообщениями сообщества ВК
+Бот для клуба БОСФОР
 
-# install & start
-
-`python ./vkbro.py`
-
-пропишите ваши доступы в config.py
-
-
+Презентация https://github.com/bashgu/vkcommunity_bot/blob/kobra/%D0%9A%D0%BE%D0%B1%D1%80%D0%B0.pptx.pdf
