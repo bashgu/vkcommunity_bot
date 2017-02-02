@@ -12,6 +12,8 @@ sys.setdefaultencoding('utf-8')
 
 from vkGroupApi import *
 import config
+import deepdish as dd
+base2=dd.io.load('base2.h5')
 
 #######################################################
 
@@ -36,7 +38,7 @@ def findCommand(read,command,row,appName):
 
             time.sleep(1)
 
-            result = messagesSend(row['user_id'],row['id'],otvet['answer'],attachment,appName=appName)
+            result = messagesSend(row['user_id'],row['id'],otvet['answer'][0],attachment,appName=appName)
 
             if not result:
                 print 'Break ...'
@@ -66,34 +68,15 @@ def startWork(lastMessages, command, appName, noAnswerSend=True):
 
             if status==0 and noAnswerSend:
                 # print (str(i['user_id'])+': "'+read + '" != Не понял команду')
-                messagesSend(row['user_id'],row['id'],'Прости, не понял тебя.' + command['help']['answer'], appName=appName)
+                messagesSend(row['user_id'],row['id'],command['question 0']['answer'], appName=appName)
+                base2['question'].append(read)
+                dd.io.save('base2.h5',base2)
 
                 return False
 
 
 
-def firstAnswer():
 
-    # for user_id,j in userList.iteritems():
-    #     # Первое сообщение
-    #
-    #     ustxtany = ['']
-    #     textw1 = 'Добро пожаловать, мы скинем вам рассписание скажите свою группу'
-    #
-    #     if j['status'] == 0:
-    #         messagesSend(user_id,j['msg_id'],textw1,'photo,photo-128566598_432688189')
-    #         j['status'] = 0
-
-    return
-
-def userList():
-    # for items in dialogs:
-    #     user_id = items['message']['user_id']
-    #     user['msg_id'] = items['message']['user_id']
-    #     user['status'] = 0
-    #
-    #     userList[user_id]=user
-    return
 
 def stripRead(read):
     # очищаем текст пользователя
@@ -109,9 +92,10 @@ def loadCommands(command):
     ckeysList=[]
     for key,row in command.iteritems():
         if not 'skip' in row:
-            ckeysList.append(row['txt'][0])
+            if row['txt'][0]!='skip':
+                ckeysList.append(row['txt'][0])
 
-    ckeys=', '.join(ckeysList)
+    ckeys='\n'.join(ckeysList)
     print ckeys
 
     return ckeys
