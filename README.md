@@ -1,11 +1,7 @@
 # vkcommunity_bot
 
-for 3EdHack Hackathon Chat (Cup 2016)
+Бот сделат на хакатоне #strhack1 для WorldGym
 
-Бот для работы с сообщениями сообщества ВК
-
-# install & start
-
-`python ./vkbro.py`
+Презентация https://github.com/bashgu/vkcommunity_bot/blob/raketa/team%20rocket.pptx.pdf
 
 
