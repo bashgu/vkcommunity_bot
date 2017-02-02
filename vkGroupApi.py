@@ -31,8 +31,6 @@ def requestVk(metod,param='',appName=appName):
     access_token, peer_id = loadConfig(appName)
 
     vk_url="https://api.vk.com/method/"
-	
-	
     vk_ver='5.53'
 
     resp = requests.get(vk_url+metod,param+'&access_token={}&v={}'.format(access_token,vk_ver))
@@ -63,7 +61,8 @@ def messagesGetDialogs(appName=appName):
 
 def messagesGet(count=30,appName=appName):
 
-    return requestVk('messages.get','&count={}'.format(count),appName)
+    return requestVk('messages.get',
+                    '&count={}'.format(count),appName)
 
 
 def messagesGetHistory(user_id,start_message_id='',count=30,appName=appName):

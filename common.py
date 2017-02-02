@@ -12,51 +12,54 @@ sys.setdefaultencoding('utf-8')
 
 from vkGroupApi import *
 import config
-import deepdish as dd
-base2=dd.io.load('base2.h5')
+
+dialogs=[]
 
 #######################################################
 
-def findCommand(read,command,row,appName):
+def findCommand(words,command,row,appName):
     # перебераем в цикле наш словарь команд и отправляем сообщение если нашли
 
-    for cmd,otvet in command.iteritems():
+    for cmd,otvet in sorted(command.iteritems()):
         attachment=''
         sticker_id=''
-
         # если нашли совпадение команды
-        if read in otvet['txt']:
+        for read in words.split():
+            read = read.strip('.').strip('!').strip('?').strip('/').strip(',').strip(' ')
+            if read in otvet['txt']:
+                
+                global x
+                x=1
 
-            if 'attachment' in otvet:
-                attachment = otvet['attachment']
+                if 'attachment' in otvet:
+                    attachment = otvet['attachment']
 
-            if 'sticker_id' in otvet:
-                messagesSend(row['user_id'],row['id'],'','',otvet['sticker_id'],appName=appName)
+                if 'sticker_id' in otvet:
+                    messagesSend(row['user_id'],row['id'],'','',otvet['sticker_id'],appName=appName)
 
-            if not 'answer' in otvet:
-                otvet['answer']=''
+                if not 'answer' in otvet:
+                    otvet['answer']=''
+                time.sleep(1)
 
-            time.sleep(1)
+                result = messagesSend(row['user_id'],row['id'],otvet['answer'],attachment,appName=appName)
 
-            result = messagesSend(row['user_id'],row['id'],otvet['answer'][0],attachment,appName=appName)
+                if not result:
+                    print 'Break ...'
+                    break
 
-            if not result:
-                print 'Break ...'
-                break
+                print '------------------------------'
+                print (str(row['user_id'])+': "'+read + '" --> ' + cmd)
 
-            print '------------------------------'
-            print (str(row['user_id'])+': "'+read + '" --> ' + cmd)
-
-            return True # нашли команду и выходим
-
+            #return True # нашли команду и выходим
+    print(x)
     return False
 
-
-def startWork(lastMessages, command, appName, noAnswerSend=True):
+def startWork(lastMessages, command, appName, noAnswerSend=True, dialogs={}):
 
     for row in lastMessages:
 
-        status=0
+        global x
+        x=0
 
         if int(row['read_state']) == 0:
 
@@ -66,36 +69,60 @@ def startWork(lastMessages, command, appName, noAnswerSend=True):
             # перебераем в цикле наш словарь команд и отправляем если нашли
             status=findCommand(read,command,row,appName)
 
-            if status==0 and noAnswerSend:
-                # print (str(i['user_id'])+': "'+read + '" != Не понял команду')
-                messagesSend(row['user_id'],row['id'],command['question 0']['answer'], appName=appName)
-                base2['question'].append(read)
-                dd.io.save('base2.h5',base2)
+            if x==0:
+                print(x)
+                if not row['user_id'] in dialogs:
+                    # посылаем в 1 сообщении faq
+                    messagesSend(row['user_id'],row['id'],command['0']['answer'], appName=appName)
+                    dialogs[row['user_id']]='1'
+                    print (str(row['user_id'])+': "'+read + '" -->  first FAQ' )
 
-                return False
+                elif x==0:                    # print (str(i['user_id'])+': "'+read + '" != Не понял команду')
+                    messagesSend(row['user_id'],row['id'],'Прости, не понял тебя.' + command['1']['answer'], appName=appName)
+                    print (str(row['user_id'])+': "'+read + '" -->  Dont understand' )
+
+                    return False
 
 
 
+def firstAnswer():
 
+    # for user_id,j in userList.iteritems():
+    #     # Первое сообщение
+    #
+    #     ustxtany = ['']
+    #     textw1 = 'Добро пожаловать, мы скинем вам рассписание скажите свою группу'
+    #
+    #     if j['status'] == 0:
+    #         messagesSend(user_id,j['msg_id'],textw1,'photo,photo-128566598_432688189')
+    #         j['status'] = 0
+
+    return
+
+def userList():
+    # for items in dialogs:
+    #     user_id = items['message']['user_id']
+    #     user['msg_id'] = items['message']['user_id']
+    #     user['status'] = 0
+    #
+    #     userList[user_id]=user
+    return
 
 def stripRead(read):
     # очищаем текст пользователя
 
     read = read.encode('utf8')
     read = read.decode('utf8').lower()
-    read = read.strip('.').strip('!').strip('?').strip('/')
 
     return read
 
 
 def loadCommands(command):
-    ckeysList=[]
+#    ckeysList=[]
     for key,row in command.iteritems():
         if not 'skip' in row:
-            if row['txt'][0]!='skip':
-                ckeysList.append(row['txt'][0])
+            ckeysList.append(row['txt'][0])
 
-    ckeys='\n'.join(ckeysList)
+    ckeys=', '.join(ckeysList)
     print ckeys
-
     return ckeys
