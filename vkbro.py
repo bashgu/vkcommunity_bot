@@ -70,13 +70,16 @@ command = {
 ckeys = loadCommands (command)
 command['help']['answer']='Что ты хочешь узнать? Например: '+ckeys+' ... просто набери любую из этих фраз'
 
+#блок try...except добавил чтоб не выкидовало при ошибках
 
 while True:
+    try:
 
-    lastMessages = messagesGet(200,appName)
+        lastMessages = messagesGet(200,appName)
+        #command['shutka']['answer']=anekdot[int(round(random.random()*98))]
 
-    command['shutka']['answer']=anekdot[int(round(random.random()*98))]
+        startWork(lastMessages, command, appName)
 
-    startWork(lastMessages, command, appName)
-
-    time.sleep(1)
+        time.sleep(1)
+    except Exception as inst:
+        print inst
